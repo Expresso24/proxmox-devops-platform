@@ -1,0 +1,78 @@
+---
+- name: Configure Rocky Linux server
+  hosts: rocky_server
+  become: true
+
+  tasks:
+    - name: Ensure EPEL repository is installed
+      ansible.builtin.dnf:
+        name: epel-release
+        state: present
+
+    - name: Install fastfetch
+      ansible.builtin.dnf:
+        name: fastfetch
+        state: present
+        update_cache: true
+
+    - name: Install dnf core plugins
+      ansible.builtin.dnf:
+        name: dnf-plugins-core
+        state: present
+
+    - name: Load required kernel modules for Docker networking
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - br_netfilter
+        - xt_addrtype
+        - iptable_nat
+
+    - name: Ensure kernel modules load on boot
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/docker.conf
+        content: |
+          br_netfilter
+          xt_addrtype
+          iptable_nat
+        mode: '0644'
+
+    - name: Enable IPv4 forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        sysctl_set: true
+        reload: true
+
+    - name: Add Docker CE official repository
+      ansible.builtin.yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+        gpgcheck: true
+        gpgkey: https://download.docker.com/linux/centos/gpg
+        state: present
+
+    - name: Install Docker CE and Compose plugin
+      ansible.builtin.dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Enable and start Docker service
+      ansible.builtin.systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Add remote user to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true

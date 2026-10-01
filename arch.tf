@@ -1,59 +1,65 @@
-resource "proxmox_virtual_environment_vm" "rocky_vm" {
-  name          = "rocky-server"
+resource "proxmox_virtual_environment_vm" "arch_vm" {
+  name          = "arch-server"
   node_name     = "pve"
-  vm_id         = 101
+  vm_id         = 103
   scsi_hardware = "virtio-scsi-pci"
+  boot_order = ["scsi0"]
+
+  protection = false
 
   hotplug = "disk,network,memory,cpu"
 
   cpu {
     cores = 2
     type  = "host"
-    numa = false
+    numa = true
   }
 
   memory {
-    dedicated = 4096
+    dedicated = 2048
   }
 
   stop_on_destroy  = true
   purge_on_destroy = true
 
   agent {
-    enabled = true
+    enabled = false
   }
 
   # Disco del sistema operativo
   disk {
     datastore_id = "local-lvm"
-    file_id      = "local:iso/Rocky-10-GenericCloud.img"
+    file_id      = "local:iso/Arch-GenericCloud.img"
     interface    = "scsi0"
-    size         = 30
+    size         = 41
     discard      = "on"
     ssd          = true
   }
 
   network_device {
-    bridge = "vmbr0"
+    bridge = "vmbr1"
     model  = "virtio"
   }
 
-  # Cloud-Init: Se crea y aprovisiona automáticamente desde este bloque
   initialization {
-    datastore_id = "local-lvm" # Dónde se almacena el disco cloud-init generado
+    datastore_id = "local-lvm"
 
     ip_config {
       ipv4 {
-        address = "192.168.1.160/24"
-        gateway = "192.168.1.254"
+        address = "10.99.0.2/24"
+        gateway = "10.99.0.1"
       }
     }
 
     user_account {
-      username = "rocky"
+      username = "arch"
       keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINAS24cXO6I2mQ6qpKW27l5cnC5j7vtODNpFSprdlu4h proxmox"
       ]
     }
+  }
+
+  lifecycle {
+    prevent_destroy = false
   }
 }

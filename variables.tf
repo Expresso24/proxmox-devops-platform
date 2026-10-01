@@ -12,3 +12,8 @@ variable "proxmox_ssh_user" {
   type      = string
   sensitive = true
 }
+
+variable "bastion_password" {
+  type        = string
+  sensitive   = true
+}
