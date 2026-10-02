@@ -1,5 +1,5 @@
-resource "proxmox_virtual_environment_vm" "bastion_vm" {
-    name = "bastion-server"
+resource "proxmox_virtual_environment_vm" "edge-proxy" {
+    name = "edge-proxy"
     node_name = "pve"
     vm_id = 105
     scsi_hardware = "virtio-scsi-single"
@@ -35,7 +35,7 @@ resource "proxmox_virtual_environment_vm" "bastion_vm" {
   # Disco del sistema operativo
   disk {
     datastore_id = "local-lvm"
-    file_id      = "local:iso/Alpine-GenericCloud.img"
+    file_id      = "local:iso/Alpine.img"
     interface    = "scsi0"
     size         = 2
     discard      = "on"
@@ -58,8 +58,8 @@ resource "proxmox_virtual_environment_vm" "bastion_vm" {
     }
 
     user_account {
-        username = "bastion"
-        password = var.bastion_password
+        username = "edge"
+        password = var.edge_password
         keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINAS24cXO6I2mQ6qpKW27l5cnC5j7vtODNpFSprdlu4h proxmox"
         ]
