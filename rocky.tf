@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "rocky_vm" {
   name          = "rocky-server"
   node_name     = "pve"
-  vm_id         = 101
+  vm_id         = 102
   scsi_hardware = "virtio-scsi-single"
   boot_order = ["scsi0"]
 
@@ -34,7 +34,7 @@ resource "proxmox_virtual_environment_vm" "rocky_vm" {
   # Disco del sistema operativo
   disk {
     datastore_id = "local-lvm"
-    file_id      = "local:iso/Rocky-Gold.img"
+    file_id      = "local:iso/Rocky.img"
     interface    = "scsi0"
     size         = 30
     discard      = "on"
@@ -44,7 +44,7 @@ resource "proxmox_virtual_environment_vm" "rocky_vm" {
 
 
   network_device {
-    bridge = "vmbr0"
+    bridge = "vmbr1"
     model  = "virtio"
   }
 
@@ -54,8 +54,8 @@ resource "proxmox_virtual_environment_vm" "rocky_vm" {
 
     ip_config {
       ipv4 {
-        address = "192.168.1.160/24"
-        gateway = "192.168.1.254"
+        address = "10.10.10.102/24"
+        gateway = "10.10.10.254"
       }
     }
 

@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "edge-proxy" {
     name = "edge-proxy"
     node_name = "pve"
-    vm_id = 105
+    vm_id = 101
     scsi_hardware = "virtio-scsi-single"
     boot_order = ["scsi0"]
 
@@ -47,6 +47,11 @@ resource "proxmox_virtual_environment_vm" "edge-proxy" {
     model  = "virtio"
   }
 
+  network_device {
+    bridge = "vmbr1"
+    model  = "virtio"
+  }
+
   initialization {
     datastore_id = "local-lvm"
 
@@ -54,6 +59,12 @@ resource "proxmox_virtual_environment_vm" "edge-proxy" {
       ipv4 {
         address = "192.168.1.164/24"
         gateway = "192.168.1.254"
+      }
+    }
+
+    ip_config {
+      ipv4 {
+        address = "10.10.10.254/24"
       }
     }
 
